@@ -4,8 +4,16 @@ A collection of Claude Code skills for mobile observability.
 
 ## Installation
 
+First, add the plugin marketplace:
+
 ```
-/plugin install bidetofevil/mo11y-skills
+/plugin marketplace add bidetofevil/mo11y-skills
+```
+
+Then install the plugin:
+
+```
+/plugin install mo11y-skills@mo11y-skills
 ```
 
 ## Available Skills

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "mo11y-skills",
+  "owner": {
+    "name": "bidetofevil"
+  },
+  "metadata": {
+    "description": "A collection of Claude Code skills for mobile observability",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "mo11y-skills",
+      "source": "./plugins/mo11y-skills",
+      "description": "A collection of Claude Code skills for mobile observability",
+      "version": "1.0.0"
+    }
+  ]
+}
