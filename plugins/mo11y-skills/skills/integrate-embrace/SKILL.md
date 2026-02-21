@@ -4,7 +4,7 @@ description: Integrate the Embrace Android SDK into an Android app with logcat t
 disable-model-invocation: true
 user-invocable: true
 argument-hint: "[path-to-android-project]"
-allowed-tools: Read, Glob, Grep, Write, Edit, Bash(./gradlew *)
+allowed-tools: Read, Glob, Grep, Write, Edit, Bash(./gradlew *), Bash(adb *)
 ---
 
 You are integrating the Embrace Android SDK into an Android project. Follow these steps precisely.
@@ -218,17 +218,38 @@ Then update `AndroidManifest.xml` to add `android:name=".MainApplication"` to th
 
 **Important**: Exporter registration MUST come before `Embrace.start()`. The SDK silently ignores exporters added after start.
 
-## Step 7: Verify
+## Step 7: Build
 
 Run `./gradlew :<app-module>:assembleDebug` to verify the project compiles.
-
-If it succeeds, inform the user:
-- "Embrace SDK integrated successfully."
-- "Run your app and filter logcat for `EmbraceSpans` and `EmbraceLogs` to see telemetry."
-- "To send data to the Embrace dashboard, create an account at https://dash.embrace.io and add your app_id and api_token to embrace-config.json."
 
 If it fails, analyze the error and attempt to fix it. Common issues:
 - Missing `mavenCentral()` in repositories
 - Version conflicts with OpenTelemetry
 - "Desugaring must be enabled when minSdk is < 26" -- add `compileOptions { isCoreLibraryDesugaringEnabled = true }` and the desugaring dependency (see Step 3)
 - "must use AGP 8.3.0+ and add android.useFullClasspathForDexingTransform=true" -- add the property to `gradle.properties` (see Step 3c)
+
+## Step 8: Verify on Device
+
+1. Confirm a device or emulator is connected by running `adb devices`. If no device is listed, ask the user to connect one and stop.
+2. Install and launch the app:
+   ```
+   adb install -r <app-module>/build/outputs/apk/debug/<apk-name>.apk
+   adb shell am start -n <applicationId>/<applicationId>.MainActivity
+   ```
+   Adjust the activity name if the launcher activity is different (check `AndroidManifest.xml` for the activity with `android.intent.action.MAIN`).
+3. Wait a few seconds for the app to start, then capture logcat output filtered for Embrace span exports:
+   ```
+   adb logcat -d -s EmbraceSpans
+   ```
+4. If the output contains any span data (any spans being emitted indicate the SDK has started successfully), the integration is successful.
+5. If no spans appear:
+   - Verify the app actually launched: `adb shell pidof <applicationId>`
+   - Try a broader filter: `adb logcat -d | grep -i embrace`
+   - Check that `Embrace.start()` is called after the exporter registration in the Application class
+   - Ensure the logcat exporters were created correctly
+
+If verification succeeds, inform the user:
+- "Embrace SDK integrated and verified. Spans are being emitted to logcat."
+- "To send data to the Embrace dashboard, create an account at https://dash.embrace.io and add your app_id and api_token to embrace-config.json."
+
+If verification fails after troubleshooting, inform the user of what was observed and suggest they check the device logs manually.
