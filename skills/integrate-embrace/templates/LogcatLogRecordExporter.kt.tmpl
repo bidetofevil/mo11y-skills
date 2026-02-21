@@ -1,0 +1,23 @@
+package {{PACKAGE_NAME}}
+
+import android.util.Log
+import io.opentelemetry.sdk.common.CompletableResultCode
+import io.opentelemetry.sdk.logs.data.LogRecordData
+import io.opentelemetry.sdk.logs.export.LogRecordExporter
+
+class LogcatLogRecordExporter : LogRecordExporter {
+    override fun export(logs: Collection<LogRecordData>): CompletableResultCode {
+        for (log in logs) {
+            Log.i(
+                "EmbraceLogs",
+                "Log: ${log.bodyValue?.asString()}, " +
+                    "Severity: ${log.severity}, " +
+                    "Attributes: ${log.attributes}"
+            )
+        }
+        return CompletableResultCode.ofSuccess()
+    }
+
+    override fun flush(): CompletableResultCode = CompletableResultCode.ofSuccess()
+    override fun shutdown(): CompletableResultCode = CompletableResultCode.ofSuccess()
+}
